@@ -6,6 +6,10 @@ import {
   readOneOwner
 } from "../repositories/owner.repository.js"
 
+import {
+  readAnimalsByOwner
+} from "../repositories/animal.repository.js";
+
 async function createOneOwner(req, res) {
   const name = await req.body.name;
   const phone = await req.body.phone;
@@ -22,7 +26,13 @@ async function updateOneOwner(req, res) {
 }
 
 async function deleteOneOwner(req, res) {
-  const ownerId = await req.params.ownerId
+  const ownerId = await req.params.ownerId;
+  const ownerAnimals = await readAnimalsByOwner(ownerId);
+  const ownerAnimalsCounter = ownerAnimals.rows.length;
+  if (ownerAnimalsCounter == 0) {
+    res.status(400).send(`Owner DOES HAVE animals and cannot be removed while they exist (#animals: ${ownerAnimalsCounter})`)
+    return ;
+  }
   const result = await deleteOwner(ownerId);
   res.status(200).send(result)
 }
